@@ -33,18 +33,18 @@ class DivergenceViewer(LogMaster):
             loaded = conditional_load()
             self.logger.debug("Loaded stock openings from disk")
         except NoHistoryFileExcption as e:
-            self.logger.warning("No history file found in \"%s\"; re-downloading" % str(e))
+            self.logger.info("No history file found in \"%s\"; re-downloading" % str(e))
             reload = True
         except OutdatedHistoryExcption as e:
-            self.logger.warning("History file out of date (was %s); re-downloading" % str(e))
+            self.logger.info("History file out of date (was %s); re-downloading" % str(e))
             reload = True
         if cli.force:
-            self.logger.debug("Forcing re-download")
+            self.logger.info("Forcing re-download")
             reload = True
 
         if reload:
             self.logger.debug("Fetching stock openings from the net...")
-            chomp = StockChomper(finishcback=self.chomp_finished, loglevel=self.loglevel)
+            chomp = StockChomper(finishcback=self.chomp_finished, loglevel=self.loglevel, workers=cli.workers)
             chomp.start()
             while not chomp.finished:
                 time.sleep(1.0)
@@ -72,5 +72,7 @@ if __name__ == "__main__":
     loglevel = logging.INFO
     if cli.debug:
         loglevel = logging.DEBUG
+    elif cli.quiet:
+        loglevel = logging.ERROR
     div = DivergenceViewer(cli, loglevel=loglevel)
     div.start()

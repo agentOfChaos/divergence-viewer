@@ -4,8 +4,10 @@ from queue import Queue
 import logging
 import datetime
 from functools import reduce
+import sys
 
 from engine.support_class import LogMaster
+
 
 
 class StockChomper(LogMaster):
@@ -22,8 +24,25 @@ class StockChomper(LogMaster):
         self.temp_results_list = []
         self.results = []
         self.finishcback = finishcback
-        self.share = Share(self.stock)
+        self.share = None
+        self.initialize()
         self.finished = False
+
+    def crash_safely(self):
+        self.logger.critical("The program will now crash. Have a nice day.")
+        sys.exit(-1)
+
+    def initialize(self, retries=5):
+        retry = 0
+        while retry < retries:
+            try:
+                self.share = Share(self.stock)
+                return
+            except Exception as e:
+                self.logger.warning("Error initializing stock data: \"%s\", retrying" % str(e))
+                retry += 1
+        self.logger.error("Initializer reached retries limit")
+        self.crash_safely()
 
     def generate_intervals(self):
         def formatdate(date):
@@ -40,12 +59,21 @@ class StockChomper(LogMaster):
         yield (formatdate(current_high), formatdate(now))
         return
 
-    def fetch_worker(self, index, timecoord):
-        self.logger.debug("Querying data for range %s..." % str(timecoord))
-        hist_data = self.share.get_historical(*timecoord)
-        self.temp_result_q.put((index, hist_data))
-        self.semaphore.release()
-        self.logger.debug("Aquired data for range %s!" % str(timecoord))
+    def fetch_worker(self, index, timecoord, retries=5):
+        retry = 0
+        while retry < retries:
+            try:
+                self.logger.debug("Querying data for range %s..." % str(timecoord))
+                hist_data = self.share.get_historical(*timecoord)
+                self.temp_result_q.put((index, hist_data))
+                self.semaphore.release()
+                self.logger.debug("Aquired data for range %s!" % str(timecoord))
+                return
+            except Exception as e:
+                self.logger.warning("Worker (%s) caught error \"%s\", retrying" % (str(timecoord), str(e)))
+                retry += 1
+        self.logger.error("Worker (%s) reached retries limit")
+        self.crash_safely()
 
     def spawn_job(self, index, timecoord):
         t = Thread(target=self.fetch_worker, args=(index, timecoord))

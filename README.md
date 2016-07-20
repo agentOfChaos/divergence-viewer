@@ -13,6 +13,11 @@ the divergence meter from the anime/visual novel Steins;gate.
 This tool shows not an actual number, but a picture more similar to the "randomart" used
 to validate ssh keys.
 
+# Dependancies
+
+    romkan
+    yahoo_finance
+
 # Usage
 
     ./diviewer.py

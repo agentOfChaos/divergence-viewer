@@ -10,4 +10,7 @@ def parsecli():
     parser.add_argument('--roman', '-r', help='Roman mode (suppress japanese output)', action="store_true")
     parser.add_argument('--force', '-f', help='Force redownload of the historical cache', action="store_true")
     parser.add_argument('--debug', '-d', help='Enables debug messages', action="store_true")
+    parser.add_argument('--workers', '-w', metavar='number', help='Number of worker threads used to download'
+                                                                  ' financial data, defaults to 4', type=int, default=4)
+    parser.add_argument('--quiet', '-q', help='Suppresses all messages except errors', action="store_true")
     return parser.parse_args()
