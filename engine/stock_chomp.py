@@ -1,111 +1,35 @@
-from yahoo_finance import Share
-from threading import Thread, Semaphore
-from queue import Queue
-import logging
+from pandas_datareader.data import DataReader
 import datetime
-from functools import reduce
-import sys
+import logging
 
 from engine.support_class import LogMaster
-
 
 
 class StockChomper(LogMaster):
 
     stock = "IBM"
     stat = "Open"
+    source = "yahoo"
 
-    datefrom = datetime.date(year=1971, month=1, day=1)
+    datefrom = datetime.date(year=1960, month=1, day=1)
 
     def __init__(self, loglevel=logging.DEBUG, workers=4, finishcback=None):
         self.setLogger(self.__class__.__name__, loglevel)
-        self.semaphore = Semaphore(workers)
-        self.temp_result_q = Queue()
-        self.temp_results_list = []
-        self.results = []
         self.finishcback = finishcback
-        self.share = None
-        self.initialize()
+        self.results = []
         self.finished = False
 
-    def crash_safely(self):
-        self.logger.critical("The program will now crash. Have a nice day.")
-        sys.exit(-1)
-
-    def initialize(self, retries=5):
-        retry = 0
-        while retry < retries:
-            try:
-                self.share = Share(self.stock)
-                return
-            except Exception as e:
-                self.logger.warning("Error initializing stock data: \"%s\", retrying" % str(e))
-                retry += 1
-        self.logger.error("Initializer reached retries limit")
-        self.crash_safely()
-
-    def generate_intervals(self):
-        def formatdate(date):
-            return date.isoformat()
+    def start(self):
+        def dayfy(timestamp):
+            return datetime.date(year=timestamp.year, month=timestamp.month, day=timestamp.day)
         now = datetime.date.today()
-        current_low = self.datefrom
-        current_high = datetime.date(year=current_low.year+1, month=1, day=1)
-        while current_high.year < now.year:
-            now = datetime.date.today()
-            val = (formatdate(current_low), formatdate(current_high))
-            current_low = current_high
-            current_high = datetime.date(year=current_low.year+1, month=1, day=1)
-            yield val
-        yield (formatdate(current_high), formatdate(now))
-        return
-
-    def fetch_worker(self, index, timecoord, retries=5):
-        retry = 0
-        while retry < retries:
-            try:
-                self.logger.debug("Querying data for range %s..." % str(timecoord))
-                hist_data = self.share.get_historical(*timecoord)
-                self.temp_result_q.put((index, hist_data))
-                self.semaphore.release()
-                self.logger.debug("Aquired data for range %s!" % str(timecoord))
-                return
-            except Exception as e:
-                self.logger.warning("Worker (%s) caught error \"%s\", retrying" % (str(timecoord), str(e)))
-                retry += 1
-        self.logger.error("Worker (%s) reached retries limit")
-        self.crash_safely()
-
-    def spawn_job(self, index, timecoord):
-        t = Thread(target=self.fetch_worker, args=(index, timecoord))
-        t.daemon = True
-        t.start()
-
-    def fetch_data(self):
-        incr = 0
-        for interval in self.generate_intervals():
-            self.semaphore.acquire()
-            self.spawn_job(incr, interval)
-            incr += 1
-        self.temp_result_q.put(None)
-
-    def gather_received(self):
-        while True:
-            pair = self.temp_result_q.get()
-            if pair is None:
-                break
-            npair = (pair[0], list(reversed(pair[1])))
-            self.temp_results_list.append(npair)
-            self.temp_results_list = sorted(self.temp_results_list, key=lambda pp: pp[0])  # sort by index
-        self.results = reduce(lambda acc, item: acc + item[1], self.temp_results_list, [])  # discard indexes and concat
-        self.results = list(map(lambda d: (d["Date"], d[self.stat]), self.results))
+        ibm = DataReader(self.stock, self.source, self.datefrom, now)
+        params = ibm.to_dict()
+        openings = params[self.stat]
+        temp_results = map(lambda k: (dayfy(k), openings[k]), openings.keys())
+        sorted_temp_results = sorted(temp_results, key=lambda pair: pair[0])
+        self.results = list(map(lambda pair: (pair[0].isoformat(), pair[1]), sorted_temp_results))
         self.finished = True
         if self.finishcback is not None:
             self.finishcback(self)
 
-    def start(self):
-        ft = Thread(target=self.fetch_data)
-        gt = Thread(target=self.gather_received)
-        ft.daemon = True
-        gt.daemon = True
-        ft.start()
-        gt.start()

@@ -44,7 +44,7 @@ class DivergenceViewer(LogMaster):
 
         if reload:
             self.logger.debug("Fetching stock openings from the net...")
-            chomp = StockChomper(finishcback=self.chomp_finished, loglevel=self.loglevel, workers=cli.workers)
+            chomp = StockChomper(finishcback=self.chomp_finished, loglevel=self.loglevel)
             chomp.start()
             while not chomp.finished:
                 time.sleep(1.0)

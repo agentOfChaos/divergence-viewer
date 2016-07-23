@@ -25,7 +25,7 @@ def partition(length):
 def hashify(resultlist):
     def step(aprevhash, elem):
         date = elem[0]
-        hashed = sha1((aprevhash[1] + "#" + elem[1]).encode("utf-8")).hexdigest()
+        hashed = sha1((aprevhash[1] + "#" + str(elem[1])).encode("utf-8")).hexdigest()
         return date, hashed
 
     hashlist = []
