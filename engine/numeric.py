@@ -2,8 +2,8 @@ import math
 from hashlib import sha1
 
 
-bigsize = 200
-mediumsize = 20
+bigsize = 250
+mediumsize = 25
 smallsize = 1
 
 
