@@ -54,7 +54,7 @@ class DivergenceViewer(LogMaster):
     def start(self):
         def symbolify(pair):
             if isinstance(pair, tuple):
-                return hash2symbol(pair[1], nihon=not cli.roman)
+                return hash2symbol(pair[1], nihon=not cli.roman, color=cli.color)
             else:
                 return "()"
         self.fetching()
