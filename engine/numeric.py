@@ -1,63 +1,58 @@
 import math
-from hashlib import sha1
+from hashlib import sha256
 
 
-bigsize = 250
-mediumsize = 25
-smallsize = 1
+def partition(length, bigsize=250, mediumsize=25):
+    """
+    Shrink a list in a smart way
+    :param length: length of the list to be partitioned
+    :param bigsize:
+    :param mediumsize:
+    :return: (big_part, medium_part, small_part): lists of indices of elements to be placed in each partition
+    """
+    big_part, medium_part, small_part = [], [], []
+
+    bigs = int(math.floor((length-1) / bigsize))
+    remainders = length - (bigs * bigsize)
+    mediums = int(math.floor((remainders-1) / mediumsize))
+    remainders -= (mediums * mediumsize)
+
+    if mediums == 0 and bigs > 0:  # to look nicer
+        bigs -= 1
+        remainders = length - (bigs * bigsize)
+        mediums = int(math.floor((remainders-1) / mediumsize))
+        remainders -= (mediums * mediumsize)
+
+    cursor = 0
+
+    for big_step in range(bigs):
+        big_part.append(cursor)
+        cursor += bigsize
+    for medium_step in range(mediums):
+        medium_part.append(cursor)
+        cursor += mediumsize
+    for small_step in range(remainders):
+        small_part.append(cursor)
+        cursor += 1
+
+    return big_part, medium_part, small_part
 
 
-def partition(length):
-    big = int(math.floor((length-1) / bigsize))
-    remainder = length - (big * bigsize)
-    medium = int(math.floor((remainder-1) / mediumsize))
-    remainder -= (medium * mediumsize)
-
-    if medium == 0 and big > 0:  # to look nicer
-        big -= 1
-        remainder = length - (big * bigsize)
-        medium = int(math.floor((remainder-1) / mediumsize))
-        remainder -= (medium * mediumsize)
-
-    return big, medium, remainder
-
-
-def hashify(resultlist):
-    def step(aprevhash, elem):
-        date = elem[0]
-        hashed = sha1((aprevhash[1] + "#" + str(elem[1])).encode("utf-8")).hexdigest()
-        return date, hashed
-
+def hashchain(mylist):
+    worklist = [("start", "start")] + mylist
     hashlist = []
-    prevhash = ("", "start")
-    for item in resultlist:
-        currhash = step(prevhash, item)
-        hashlist.append(currhash)
-        prevhash = currhash
+
+    def string_hash(mystring):
+        return sha256(mystring.encode("utf-8")).hexdigest()
+
+    def stepfun(index):
+        elem = worklist[index]
+        value = elem[1]
+        return string_hash(hashlist[index-1] + "#" + value)
+
+    hashlist.append(string_hash("start"))
+    for index in range(len(mylist)):
+        hashlist.append(stepfun(index+1))
 
     return hashlist
 
-
-def get_partiton_representative(alist, apartition, sep=(None, None)):
-    repres = []
-    (big, medium, small) = apartition
-    curs = 0
-    for b in range(big):
-        curs += bigsize
-        repres.append(alist[curs-1])
-
-    if sep[0] is not None:
-        repres.append(sep[0])
-
-    for m in range(medium):
-        curs += mediumsize
-        repres.append(alist[curs-1])
-
-    if sep[1] is not None:
-        repres.append(sep[1])
-
-    for s in range(small):
-        curs += smallsize
-        repres.append(alist[curs-1])
-
-    return repres
