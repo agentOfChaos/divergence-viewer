@@ -1,6 +1,6 @@
 import argparse
 
-from engine.stock_chomp import StockChomper
+from .stock_chomp import StockChomper
 
 
 def parsecli():

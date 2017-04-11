@@ -2,7 +2,7 @@ from pandas_datareader.data import DataReader
 import datetime
 import logging
 
-from engine.support_class import LogMaster
+from .support_class import LogMaster
 
 
 class StockChomper(LogMaster):
