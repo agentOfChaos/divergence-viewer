@@ -1,12 +1,20 @@
 import logging
 import datetime
 
-from .engine.support_class import LogMaster
-from .engine.stock_chomp import StockChomper
-from .engine.cliparse import parsecli
-from .engine import numeric, symbolic
-from .engine.spiral import draw_spiral, pretty_print_grid
-from .engine.img_gen import string_to_png
+if __name__ == "__main__":
+    from engine.support_class import LogMaster
+    from engine.stock_chomp import StockChomper
+    from engine.cliparse import parsecli
+    from engine import numeric, symbolic
+    from engine.spiral import draw_spiral, pretty_print_grid
+    from engine.img_gen import string_to_png
+else:
+    from .engine.support_class import LogMaster
+    from .engine.stock_chomp import StockChomper
+    from .engine.cliparse import parsecli
+    from .engine import numeric, symbolic
+    from .engine.spiral import draw_spiral, pretty_print_grid
+    from .engine.img_gen import string_to_png
 
 
 class DivergenceViewer(LogMaster):
@@ -72,6 +80,11 @@ class DivergenceViewer(LogMaster):
 
     def visualize_png(self):
         string_to_png(self.gen_visual_string(), cli.image_output)
+
+
+class objectview():
+    def __init__(self, d):
+        self.__dict__ = d
 
 
 if __name__ == "__main__":
