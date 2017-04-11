@@ -40,7 +40,7 @@ class DivergenceViewer(LogMaster):
             self.logger.debug(str(datum))
 
     def hash_to_symbol(self, digest):
-        return symbolic.hash2symbol(digest, nihon=not cli.roman, color=cli.color)
+        return symbolic.hash2symbol(digest, nihon=not self.cliparams.roman, color=self.cliparams.color)
 
     def extend_symbol_list(self, symbolist, hashlist):
         symbolist.append(symbolic.separator)
@@ -79,7 +79,7 @@ class DivergenceViewer(LogMaster):
         print(self.gen_visual_string())
 
     def visualize_png(self):
-        string_to_png(self.gen_visual_string(), cli.image_output)
+        string_to_png(self.gen_visual_string(), self.cliparams.image_output)
 
 
 class objectview():
