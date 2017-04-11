@@ -1,12 +1,12 @@
 import logging
 import datetime
 
-from engine.support_class import LogMaster
-from engine.stock_chomp import StockChomper
-from engine.cliparse import parsecli
-from engine import numeric, symbolic
-from engine.spiral import draw_spiral, pretty_print_grid
-from engine.img_gen import string_to_png
+from .engine.support_class import LogMaster
+from .engine.stock_chomp import StockChomper
+from .engine.cliparse import parsecli
+from .engine import numeric, symbolic
+from .engine.spiral import draw_spiral, pretty_print_grid
+from .engine.img_gen import string_to_png
 
 
 class DivergenceViewer(LogMaster):
