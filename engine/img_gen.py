@@ -13,4 +13,4 @@ def string_to_png(mystr, filename, font="NotoSansMonoCJKjp-Regular.otf", fontsiz
     drawer = ImageDraw.Draw(trueimg)
     drawer.text((0,0), mystr, fill=fgcolor, font=fontobj)
     with open(filename, "wb") as fp:
-        trueimg.save(fp)
+        trueimg.save(fp, "png")
