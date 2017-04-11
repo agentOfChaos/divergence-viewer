@@ -17,6 +17,7 @@ to validate ssh keys.
 
     romkan
     pandas
+    colorama
 
 # Usage
 
