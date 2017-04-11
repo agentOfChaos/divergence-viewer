@@ -13,4 +13,6 @@ def parsecli():
     parser.add_argument('--quiet', '-q', help='Suppresses all messages except errors', action="store_true")
     parser.add_argument('--image-output', '-i', metavar='filename',
                         help='Do not output to stdout, generate an image instead', type=str, default='no')
+    parser.add_argument('--font', '-f', help='Font to use in the image (see -i)', type=str,
+                        default='NotoSansMonoCJKjp-Regular.otf'))
     return parser.parse_args()

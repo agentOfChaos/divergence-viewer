@@ -79,7 +79,7 @@ class DivergenceViewer(LogMaster):
         print(self.gen_visual_string())
 
     def visualize_png(self):
-        string_to_png(self.gen_visual_string(), self.cliparams.image_output)
+        string_to_png(self.gen_visual_string(), self.cliparams.image_output, font=self.cliparams.font)
 
 
 class objectview():
