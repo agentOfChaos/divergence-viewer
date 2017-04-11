@@ -11,4 +11,6 @@ def parsecli():
     parser.add_argument('--color', '-c', help='Colorize output (default off)', action="store_true")
     parser.add_argument('--debug', '-d', help='Enables debug messages', action="store_true")
     parser.add_argument('--quiet', '-q', help='Suppresses all messages except errors', action="store_true")
+    parser.add_argument('--image-output', '-i', metavar='filename',
+                        help='Do not output to stdout, generate an image instead', type=str, default='no')
     return parser.parse_args()

@@ -6,6 +6,7 @@ from engine.stock_chomp import StockChomper
 from engine.cliparse import parsecli
 from engine import numeric, symbolic
 from engine.spiral import draw_spiral, pretty_print_grid
+from engine.img_gen import string_to_png
 
 
 class DivergenceViewer(LogMaster):
@@ -45,7 +46,7 @@ class DivergenceViewer(LogMaster):
         for digest in self.hashlist:
             self.logger.debug(digest)
 
-        self.logger.debug("Building hash-chain")
+        self.logger.debug("Partitioning")
 
         big_part, medium_part, small_part = numeric.partition(len(self.stockdata))
 
@@ -60,12 +61,17 @@ class DivergenceViewer(LogMaster):
         self.load_stock_data()
         self.partitionize()
 
-    def visualize(self):
+    def gen_visual_string(self):
         grid = draw_spiral(self.symbolist)
-        visual = pretty_print_grid(grid,
-                                   datetime.date.today().isoformat(),
-                                   self.hashlist[-1][:8])  # [last element][first 8 characters]
-        print(visual)
+        return pretty_print_grid(grid,
+                                 datetime.date.today().isoformat(),
+                                 self.hashlist[-1][:8])  # [last element][first 8 characters]
+
+    def visualize(self):
+        print(self.gen_visual_string())
+
+    def visualize_png(self):
+        string_to_png(self.gen_visual_string(), cli.image_output)
 
 
 if __name__ == "__main__":
@@ -79,4 +85,7 @@ if __name__ == "__main__":
 
     div = DivergenceViewer(cli, loglevel=loglevel)
     div.calculate()
-    div.visualize()
+    if cli.image_output != "no":
+        div.visualize_png()
+    else:
+        div.visualize()
