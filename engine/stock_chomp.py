@@ -44,7 +44,7 @@ class StockChomper(LogMaster):
         self.stock_cache = list(map(
             lambda pair: (pair[0].isoformat(), "%.2f" % pair[1]),  # important: float value is rounded here
             sorted_temp_results))  # date() -> String
-        self.logger("Parsing complete")
+        self.logger.debug("Parsing complete")
         return self.stock_cache
 
     def dayfy(self, timestamp):
