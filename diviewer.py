@@ -25,7 +25,8 @@ class DivergenceViewer(LogMaster):
         self.setLogger(self.__class__.__name__, loglevel)
         self.cliparams = cli
 
-        self.stocksource = StockChomper(datefrom=datetime.datetime.strptime(cli.beginning, "%Y-%m-%d"), 
+        self.datefrom = datetime.datetime.strptime(cli.beginning, "%Y-%m-%d")
+        self.stocksource = StockChomper(datefrom=self.datefrom, 
                                         loglevel=loglevel)
         self.hashlist = []
         self.symbolist = []
@@ -78,8 +79,8 @@ class DivergenceViewer(LogMaster):
     def gen_visual_string(self):
         grid = draw_spiral(self.symbolist)
         return pretty_print_grid(grid,
-                                 datetime.date.today().isoformat(),
-                                 self.hashlist[-1][:8])  # [last element][first 8 characters]
+                                 self.datefrom.date().isoformat(),
+                                 datetime.date.today().isoformat())  # [last element][first 8 characters]
 
     def visualize(self):
         print(self.gen_visual_string())
