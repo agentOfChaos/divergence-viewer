@@ -72,7 +72,7 @@ class DivergenceViewer(LogMaster):
     def calculate(self):
         self.load_stock_data()
         if len(self.stockdata) == 0:
-            self.logger.critical("Could not load stock data")
+            self.logger.critical("Could not load stock data (the initial date is %s, try setting a more recent one.)" % self.datefrom.date().isoformat())
             exit(-1)
         self.partitionize()
 
