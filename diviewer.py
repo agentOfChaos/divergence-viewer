@@ -25,7 +25,8 @@ class DivergenceViewer(LogMaster):
         self.setLogger(self.__class__.__name__, loglevel)
         self.cliparams = cli
 
-        self.stocksource = StockChomper(loglevel=loglevel)
+        self.stocksource = StockChomper(datefrom=datetime.datetime.strptime(cli.beginning, "%Y-%m-%d"), 
+                                        loglevel=loglevel)
         self.hashlist = []
         self.symbolist = []
 
@@ -69,6 +70,9 @@ class DivergenceViewer(LogMaster):
 
     def calculate(self):
         self.load_stock_data()
+        if len(self.stockdata) == 0:
+            self.logger.critical("Could not load stock data")
+            exit(-1)
         self.partitionize()
 
     def gen_visual_string(self):

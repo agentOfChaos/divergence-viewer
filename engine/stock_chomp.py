@@ -9,22 +9,23 @@ from .support_class import LogMaster
 class StockChomper(LogMaster):
 
     stock = "IBM"
-    api_endpoint = "http://www.investopedia.com/markets/api/partial/historical/"
-    api_date_req_format = "%b+%d,+%Y"
+    api_endpoint = "https://www.investopedia.com/markets/api/partial/historical/"
+    api_date_req_format = "%b+%d%%2C+%Y"
     api_date_resp_format = "%b %d, %Y"
 
-    datefrom = datetime.date(year=1962, month=1, day=2)
-
-    def __init__(self, loglevel=logging.DEBUG):
+    def __init__(self, datefrom, loglevel=logging.DEBUG):
         self.setLogger(self.__class__.__name__, loglevel)
+        self.datefrom = datefrom
         self.stock_cache = []
 
     def download(self):
-        rawhtml = requests.get(self.api_endpoint + "?Symbol=" + self.stock + \
-                                                   "&Type=Historical+Prices" + \
-                                                   "&Timeframe=Daily" + \
-                                                   "&StartDate=" + self.datefrom.strftime(self.api_date_req_format) + \
-                                                   "&EndDate=" + datetime.date.today().strftime(self.api_date_req_format)).text
+        query_url = self.api_endpoint + "?Symbol=" + self.stock + \
+                                        "&Type=Historical+Prices" + \
+                                        "&Timeframe=Daily" + \
+                                        "&StartDate=" + self.datefrom.strftime(self.api_date_req_format) + \
+                                        "&EndDate=" + datetime.date.today().strftime(self.api_date_req_format)
+        self.logger.debug("Downloading stock data from: %s" % query_url)
+        rawhtml = requests.get(query_url).text
         self.logger.debug("Download complete, beginning parsing")
         soup = BeautifulSoup(rawhtml, "html.parser")
         data_items = soup.find_all("tr", attrs={"class": "in-the-money"})
