@@ -1,7 +1,8 @@
 import datetime
 import logging
 import requests
-from bs4 import BeautifulSoup
+import csv
+from io import StringIO
 
 from .support_class import LogMaster
 
@@ -9,9 +10,9 @@ from .support_class import LogMaster
 class StockChomper(LogMaster):
 
     stock = "IBM"
-    api_endpoint = "https://www.investopedia.com/markets/api/partial/historical/"
-    api_date_req_format = "%b+%d%%2C+%Y"
-    api_date_resp_format = "%b %d, %Y"
+    api_endpoint = "https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%d&period2=%d&interval=1d&events=history&crumb=%s"
+    crumb = "iKh0KK.2Lmu"
+    cookies = {"B": "0gp97shec33u5&b=3&s=4f"}
 
     def __init__(self, datefrom, loglevel=logging.DEBUG):
         self.setLogger(self.__class__.__name__, loglevel)
@@ -19,28 +20,24 @@ class StockChomper(LogMaster):
         self.stock_cache = []
 
     def download(self):
-        query_url = self.api_endpoint + "?Symbol=" + self.stock + \
-                                        "&Type=Historical+Prices" + \
-                                        "&Timeframe=Daily" + \
-                                        "&StartDate=" + self.datefrom.strftime(self.api_date_req_format) + \
-                                        "&EndDate=" + datetime.date.today().strftime(self.api_date_req_format)
+        query_url = self.api_endpoint % (self.stock, 
+                                         self.convert_time_period(self.datefrom), 
+                                         self.convert_time_period(datetime.date.today()), 
+                                         self.crumb)
         self.logger.debug("Downloading stock data from: %s" % query_url)
-        rawhtml = requests.get(query_url).text
+        fp = StringIO(requests.get(query_url, cookies=self.cookies).text)
         self.logger.debug("Download complete, beginning parsing")
-        soup = BeautifulSoup(rawhtml, "html.parser")
-        data_items = soup.find_all("tr", attrs={"class": "in-the-money"})
+        
+        reader = csv.reader(fp, delimiter=",")
+        next(reader, None)
+        
         temp_results = []
-        for dataitem in data_items:
-            try:
-                date_cell = dataitem.find("td", attrs={"class": "date"})
-                open_cell = dataitem.find("td", attrs={"class": "num"})
-                temp_results.append((
-                    self.dayfy(datetime.datetime.strptime(date_cell.getText(), self.api_date_resp_format)),
-                    float(open_cell.getText())
+        for row in reader:
+            temp_results.append((
+                datetime.datetime.strptime(row[0], "%Y-%m-%d"),
+                float(row[1])
                 ))
-            except AttributeError:
-                continue
-
+        
         sorted_temp_results = sorted(temp_results, key=lambda pair: pair[0])  # sort by date
         self.stock_cache = list(map(
             lambda pair: (pair[0].isoformat(), "%.2f" % pair[1]),  # important: float value is rounded here
@@ -48,6 +45,7 @@ class StockChomper(LogMaster):
         self.logger.debug("Parsing complete")
         return self.stock_cache
 
-    def dayfy(self, timestamp):
-        return datetime.date(year=timestamp.year, month=timestamp.month, day=timestamp.day)
+    def convert_time_period(self, dateobj):
+        delta = dateobj - datetime.date(1970, 1, 1)
+        return delta.days*60*60*24
 
