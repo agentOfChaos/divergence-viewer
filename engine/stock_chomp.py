@@ -5,6 +5,7 @@ import csv
 from io import StringIO
 
 from .support_class import LogMaster
+from .numeric import custom_round
 
 
 class StockChomper(LogMaster):
@@ -35,12 +36,12 @@ class StockChomper(LogMaster):
         for row in reader:
             temp_results.append((
                 datetime.datetime.strptime(row[0], "%Y-%m-%d"),
-                float(row[1])
+                row[1]
                 ))
         
         sorted_temp_results = sorted(temp_results, key=lambda pair: pair[0])  # sort by date
         self.stock_cache = list(map(
-            lambda pair: (pair[0].isoformat(), "%.2f" % pair[1]),  # important: float value is rounded here
+            lambda pair: (pair[0].isoformat(), custom_round(pair[1], 2)),  # important: float value is rounded here
             sorted_temp_results))  # date() -> String
         self.logger.debug("Parsing complete")
         return self.stock_cache

@@ -54,6 +54,9 @@ class DivergenceViewer(LogMaster):
         self.logger.debug("Building hash-chain")
 
         self.hashlist = numeric.hashchain(self.stockdata)
+        
+        #alphabet = "⬤アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワガギグゲゴザジズゼゾダデドバビブベボパピプペポ"
+        #print(",".join(map(lambda h: str(alphabet.index(symbolic.hash2symbol(h, nihon=not self.cliparams.roman, color=self.cliparams.color))), self.hashlist)))
 
         for digest in self.hashlist:
             self.logger.debug(digest)
