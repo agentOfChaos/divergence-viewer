@@ -7,7 +7,9 @@ default_datefrom = '1962-01-02'
 
 
 def parsecli():
-    parser = argparse.ArgumentParser(description="Remote server for the MoonrabbitOS filesystem protocol.")
+    parser = argparse.ArgumentParser(description="Display a visual \"hash\" of the current timeline, by aggregating"
+                                                 " data from stock history. It will not work prior to %s" %
+                                                 default_datefrom)
     parser.add_argument('--roman', '-r', help='Roman mode (suppress japanese output)', action="store_true")
     parser.add_argument('--color', '-c', help='Colorize output (default off)', action="store_true")
     parser.add_argument('--debug', '-d', help='Enables debug messages', action="store_true")
