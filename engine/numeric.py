@@ -34,6 +34,7 @@ def partition(length, bigsize=250, mediumsize=25):
     for small_step in range(remainders):
         small_part.append(cursor)
         cursor += 1
+    small_part.append(cursor)
 
     return big_part, medium_part, small_part
 

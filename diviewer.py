@@ -71,6 +71,7 @@ class DivergenceViewer(LogMaster):
         self.extend_symbol_list(self.symbolist, map(lambda index: self.hashlist[index], big_part))
         self.extend_symbol_list(self.symbolist, map(lambda index: self.hashlist[index], medium_part))
         self.extend_symbol_list(self.symbolist, map(lambda index: self.hashlist[index], small_part))
+        self.logger.debug(",".join(list(map(self.hash_to_symbol, self.hashlist))))
 
     def calculate(self):
         self.load_stock_data()
