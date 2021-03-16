@@ -20,6 +20,10 @@ class StockChomper(LogMaster):
         self.datefrom = datefrom
         self.stock_cache = []
 
+    @staticmethod
+    def validate_row(row):
+        return row[1] != "null"
+
     def download(self):
         query_url = self.api_endpoint % (self.stock, 
                                          self.convert_time_period(self.datefrom), 
@@ -42,7 +46,8 @@ class StockChomper(LogMaster):
         sorted_temp_results = sorted(temp_results, key=lambda pair: pair[0])  # sort by date
         self.stock_cache = list(map(
             lambda pair: (pair[0].isoformat(), custom_round(pair[1], 2)),  # important: float value is rounded here
-            sorted_temp_results))  # date() -> String
+            filter(lambda pair: self.validate_row(pair),
+                   sorted_temp_results)))  # date() -> String
         self.logger.debug("Parsing complete")
         return self.stock_cache
 
