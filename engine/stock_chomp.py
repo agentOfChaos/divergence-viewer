@@ -14,6 +14,7 @@ class StockChomper(LogMaster):
     api_endpoint = "https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%d&period2=%d&interval=1d&events=history&crumb=%s"
     crumb = "iKh0KK.2Lmu"
     cookies = {"B": "0gp97shec33u5&b=3&s=4f"}
+    useragent = "Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101 Firefox/78.0"
 
     def __init__(self, datefrom, loglevel=logging.DEBUG):
         self.setLogger(self.__class__.__name__, loglevel)
@@ -30,7 +31,7 @@ class StockChomper(LogMaster):
                                          self.convert_time_period(datetime.date.today()), 
                                          self.crumb)
         self.logger.debug("Downloading stock data from: %s" % query_url)
-        fp = StringIO(requests.get(query_url, cookies=self.cookies).text)
+        fp = StringIO(requests.get(query_url, cookies=self.cookies, headers={"User-Agent": self.useragent}).text)
         self.logger.debug("Download complete, beginning parsing")
         
         reader = csv.reader(fp, delimiter=",")
